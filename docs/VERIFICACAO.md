@@ -32,4 +32,8 @@ Execute a API e use o Swagger ou `requisicoes.http`. Use apenas dados fictícios
 | Excluir cliente | 204; cliente e dívidas deixam de existir |
 | Criar banco pelo script SQL e executar a API sobre ele | Mesmas operações e restrições |
 
-Na conferência de desenvolvimento, a solução compilou sem avisos ou erros. Foram aprovadas 100 verificações de API e banco, incluindo requisições simultâneas para CPF duplicado e dívida em aberto, persistência após reiniciar e uso do banco criado pelo script SQL.
+Na conferência da versão com SQL direto, a solução compilou sem avisos ou erros. Foram aprovadas 143 verificações: as 100 de API e banco, mais 43 de parâmetros, datas, transações e compatibilidade. Isso inclui requisições simultâneas para CPF duplicado e dívida em aberto, persistência após reiniciar e uso do banco criado pelo script SQL.
+
+Também foram conferidos nomes com apóstrofos e texto semelhante a SQL, buscas literais por `%` e `_`, idade antes e depois do aniversário, valores monetários mínimo e máximo e leitura e atualização de uma cópia do banco da versão anterior.
+
+Para verificar o rollback, foi simulada uma falha durante o pagamento em um banco separado de testes. Uma escrita parcial feita por um trigger foi desfeita, e a dívida permaneceu aberta e sem data de pagamento. Após remover a falha simulada, o pagamento voltou a funcionar. Esse trigger não faz parte do schema da aplicação.

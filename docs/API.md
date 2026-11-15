@@ -140,7 +140,7 @@ Conflitos e recursos não encontrados retornam uma mensagem:
 }
 ```
 
-Erros de validação usam o formato padrão do ASP.NET Core, com `status`, `title` e um objeto `errors` que identifica os campos. JSON malformado também retorna 400.
+As validações de negócio também retornam 400 com um objeto `mensagem`, explicando o primeiro problema encontrado. Erros de leitura do JSON, tipos incompatíveis e datas com formato inválido usam a resposta padrão do ASP.NET Core, com `status`, `title` e `errors`. As rotas e os campos de sucesso permanecem os mesmos da primeira versão.
 
 ## Exclusão
 

@@ -1,7 +1,7 @@
 # Vendinha
 
 API para cadastrar clientes e controlar compras fiadas de uma vendinha.
-Desenvolvida em C# com ASP.NET Core 8, Entity Framework Core e SQLite.
+Desenvolvida em C# com ASP.NET Core 8 e SQLite, com comandos SQL parametrizados através de `Microsoft.Data.Sqlite`.
 
 ## Como executar no Visual Studio
 
@@ -44,10 +44,11 @@ Abra `http://localhost:5080/swagger`. Para encerrar, pressione `Ctrl+C` no termi
 ```text
 Vendinha.sln
 Vendinha.Api/
-  Controllers/       Rotas de clientes e dívidas
-  Data/              Configuração do Entity Framework e das tabelas
+  Controllers/       Apresentação: rotas HTTP e respostas da API
+  Negocio/           Validações, cálculos e regras de clientes e dívidas
+  Dados/             Conexões, comandos SQL e transações
   Dtos/              Dados recebidos e devolvidos pela API
-  Models/            Classes Cliente e Divida
+  Models/            Classes Cliente e Divida, com propriedades e cálculo de idade
   Validation/        Validação do CPF
   Properties/        Perfil de execução do Visual Studio
   Program.cs         Inicialização da aplicação
@@ -64,19 +65,31 @@ requisicoes.http     Exemplos para executar no Visual Studio
 
 A conexão está em `Vendinha.Api/appsettings.json`. O caminho relativo do arquivo é resolvido a partir da pasta de execução.
 
-O script [database/schema.sql](database/schema.sql) cria a mesma estrutura usada pela aplicação. É possível executá-lo em um editor SQLite sobre um banco vazio e apontar a conexão para esse arquivo. Se preferir usar o terminal do SQLite, entre na pasta `Vendinha.Api`, abra `sqlite3 vendinha.db` e execute:
+O script [database/schema.sql](database/schema.sql) é usado pela própria aplicação na inicialização e é copiado para a pasta de saída durante a compilação. Também é possível executá-lo em um editor SQLite sobre um banco vazio e apontar a conexão para esse arquivo. Se preferir usar o terminal do SQLite, entre na pasta `Vendinha.Api`, abra `sqlite3 vendinha.db` e execute:
 
 ```sql
 .read ../database/schema.sql
 ```
 
-O comando `.read` pertence ao terminal do SQLite, não à linguagem SQL. O uso desse terminal é opcional, pois a aplicação cria o banco com `EnsureCreated()`.
+O comando `.read` pertence ao terminal do SQLite, não à linguagem SQL. O uso desse terminal é opcional, pois `BancoDados.CriarTabelas()` executa o script automaticamente.
 
 Há duas tabelas: `Clientes` e `Dividas`, ligadas por `ClienteId`. O CPF possui índice único. Um índice único parcial permite somente uma dívida não paga por cliente. Ao excluir um cliente, suas dívidas também são excluídas.
 
 Os valores são armazenados em centavos inteiros para preservar os centavos nas somas e na ordenação. Na API, os valores são números decimais em reais, como `35.90`.
 
-`EnsureCreated()` cria um banco novo, mas não atualiza automaticamente a estrutura de um banco que já existe. Este projeto não utiliza migrations.
+Os comandos `CREATE ... IF NOT EXISTS` criam a estrutura inicial, mas não alteram automaticamente colunas de tabelas existentes. A estrutura continua compatível com o banco da primeira versão do projeto.
+
+## Organização em três camadas
+
+1. **Apresentação:** os controllers recebem os dados e devolvem respostas HTTP. `ErroNegocioFilter` converte os erros previstos pela aplicação em códigos 400, 404 e 409.
+2. **Negócio:** `ClienteNegocio` e `DividaNegocio` validam entradas e coordenam cadastro, alteração, consulta e pagamento. O cálculo da idade fica na propriedade `Cliente.Idade`.
+3. **Dados:** `ClienteDados`, `DividaDados` e `BancoDados` abrem conexões, executam SQL e leem os resultados com `SqliteDataReader`.
+
+O fluxo é `Controller -> Negocio -> Dados -> SQLite`. As camadas são organizadas em pastas no mesmo projeto, sem criar várias soluções ou bibliotecas.
+
+Os comandos usam `Parameters.AddWithValue` para enviar valores separadamente do texto SQL. `ExecuteReader` lê linhas, `ExecuteNonQuery` grava ou remove dados e `ExecuteScalar` obtém um único valor, como uma contagem ou o último ID criado. As consultas nomeiam as colunas explicitamente.
+
+Inserção e leitura do ID gerado, assim como pagamento e leitura do resultado, usam a mesma conexão e transação. Em caso de sucesso, `Commit()` confirma a operação; em caso de falha, `Rollback()` desfaz as alterações. A contagem e a página da listagem também compartilham uma transação de leitura. Atualização e exclusão cadastral usam um único comando, cuja execução já é atômica no SQLite.
 
 ## Decisões adotadas
 
@@ -96,4 +109,6 @@ Se a porta 5080 estiver ocupada, altere `applicationUrl` em `Properties/launchSe
 ## Referências
 
 - [Validação de modelos no ASP.NET Core](https://learn.microsoft.com/aspnet/core/mvc/models/validation?view=aspnetcore-8.0).
-- [Provedor SQLite do Entity Framework Core](https://learn.microsoft.com/ef/core/providers/sqlite/).
+- [Microsoft.Data.Sqlite](https://learn.microsoft.com/dotnet/standard/data/sqlite/).
+- [Parâmetros SQL](https://learn.microsoft.com/dotnet/standard/data/sqlite/parameters).
+- [Transações com SQLite](https://learn.microsoft.com/dotnet/standard/data/sqlite/transactions).
