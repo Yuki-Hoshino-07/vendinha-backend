@@ -1,28 +1,29 @@
 using Vendinha.Api.Models;
 
-namespace Vendinha.Api.Dtos;
-
-public class ClienteResponse
+namespace Vendinha.Api.Dtos
 {
-    public int Id { get; set; }
-    public string NomeCompleto { get; set; } = "";
-    public string Cpf { get; set; } = "";
-    public DateOnly DataNascimento { get; set; }
-    public int Idade { get; set; }
-    public string? Email { get; set; }
-    public decimal TotalDividas { get; set; }
-
-    public static ClienteResponse DeCliente(Cliente cliente, long totalCentavos)
+    public class ClienteResponse
     {
-        return new ClienteResponse
+        public int Id { get; set; }
+        public string NomeCompleto { get; set; } = "";
+        public string Cpf { get; set; } = "";
+        public DateOnly DataNascimento { get; set; }
+        public int Idade { get; set; }
+        public string? Email { get; set; }
+        public decimal TotalDividas { get; set; }
+
+        public static ClienteResponse DeCliente(Cliente cliente)
         {
-            Id = cliente.Id,
-            NomeCompleto = cliente.NomeCompleto,
-            Cpf = cliente.Cpf,
-            DataNascimento = cliente.DataNascimento,
-            Idade = cliente.CalcularIdade(DateOnly.FromDateTime(DateTime.Today)),
-            Email = cliente.Email,
-            TotalDividas = totalCentavos / 100m
-        };
+            return new ClienteResponse
+            {
+                Id = cliente.Id,
+                NomeCompleto = cliente.NomeCompleto,
+                Cpf = cliente.Cpf,
+                DataNascimento = DateOnly.FromDateTime(cliente.DataNascimento),
+                Idade = cliente.Idade,
+                Email = cliente.Email,
+                TotalDividas = cliente.TotalDividasCentavos / 100m
+            };
+        }
     }
 }

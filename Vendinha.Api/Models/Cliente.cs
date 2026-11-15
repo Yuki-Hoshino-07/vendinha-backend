@@ -1,20 +1,25 @@
-namespace Vendinha.Api.Models;
-
-public class Cliente
+namespace Vendinha.Api.Models
 {
-    public int Id { get; set; }
-    public string NomeCompleto { get; set; } = "";
-    public string Cpf { get; set; } = "";
-    public DateOnly DataNascimento { get; set; }
-    public string? Email { get; set; }
-    public List<Divida> Dividas { get; set; } = new();
-
-    public int CalcularIdade(DateOnly hoje)
+    public class Cliente
     {
-        int idade = hoje.Year - DataNascimento.Year;
-        if (DataNascimento.AddYears(idade) > hoje)
-            idade--;
+        public int Id { get; set; }
+        public string NomeCompleto { get; set; } = "";
+        public string Cpf { get; set; } = "";
+        public DateTime DataNascimento { get; set; }
+        public string? Email { get; set; }
+        public long TotalDividasCentavos { get; set; }
 
-        return idade;
+        public int Idade
+        {
+            get
+            {
+                int idade = DateTime.Today.Year - DataNascimento.Year;
+                if (DataNascimento.Date.AddYears(idade) > DateTime.Today)
+                {
+                    idade--;
+                }
+                return idade;
+            }
+        }
     }
 }

@@ -1,27 +1,35 @@
-using Microsoft.EntityFrameworkCore;
-using Vendinha.Api.Data;
+using Vendinha.Api.Controllers;
+using Vendinha.Api.Dados;
+using Vendinha.Api.Negocio;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<VendinhaContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Vendinha")));
-
-var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
+namespace Vendinha.Api
 {
-    var banco = scope.ServiceProvider.GetRequiredService<VendinhaContext>();
-    banco.Database.EnsureCreated();
-}
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddControllers(options => options.Filters.Add<ErroNegocioFilter>());
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+            builder.Services.AddSingleton<BancoDados>();
+            builder.Services.AddScoped<ClienteDados>();
+            builder.Services.AddScoped<DividaDados>();
+            builder.Services.AddScoped<ClienteNegocio>();
+            builder.Services.AddScoped<DividaNegocio>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+            var app = builder.Build();
+            var banco = app.Services.GetRequiredService<BancoDados>();
+            banco.CriarTabelas();
 
-app.MapControllers();
-app.Run();
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.MapControllers();
+            app.Run();
+        }
+    }
+}
