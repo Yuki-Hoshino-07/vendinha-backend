@@ -1,0 +1,51 @@
+@baseUrl = http://localhost:5080
+@clienteId = 1
+@dividaId = 1
+
+### Cadastrar cliente; anote o ID retornado e ajuste clienteId acima
+POST {{baseUrl}}/api/clientes
+Content-Type: application/json
+
+{
+  "nomeCompleto": "Ana Souza",
+  "cpf": "12345678909",
+  "dataNascimento": "2000-05-10",
+  "email": "ana@example.com"
+}
+
+### Listar clientes
+GET {{baseUrl}}/api/clientes?pagina=1
+
+### Buscar por parte do nome
+GET {{baseUrl}}/api/clientes?nome=ana&pagina=1
+
+### Consultar um cliente
+GET {{baseUrl}}/api/clientes/{{clienteId}}
+
+### Atualizar os dados do cliente
+PUT {{baseUrl}}/api/clientes/{{clienteId}}
+Content-Type: application/json
+
+{
+  "nomeCompleto": "Ana Souza Silva",
+  "cpf": "12345678909",
+  "dataNascimento": "2000-05-10",
+  "email": "ana.silva@example.com"
+}
+
+### Criar divida; anote o ID retornado e ajuste dividaId acima
+POST {{baseUrl}}/api/clientes/{{clienteId}}/dividas
+Content-Type: application/json
+
+{
+  "valor": 35.90
+}
+
+### Listar dividas
+GET {{baseUrl}}/api/clientes/{{clienteId}}/dividas
+
+### Registrar pagamento
+PATCH {{baseUrl}}/api/clientes/{{clienteId}}/dividas/{{dividaId}}/pagamento
+
+### Excluir cliente e todo o seu historico; execute apenas ao final do teste
+DELETE {{baseUrl}}/api/clientes/{{clienteId}}
