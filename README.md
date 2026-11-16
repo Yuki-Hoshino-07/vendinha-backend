@@ -45,3 +45,8 @@ A listagem permite buscar parte do nome, traz dez clientes por página e ordena 
 - [Rotas, exemplos e regras da API](docs/API.md)
 - [Roteiro de verificação](docs/VERIFICACAO.md)
 - [Exemplos de requisições HTTP](requisicoes.http)
+
+
+### Leonardo Portaluppi Ferreira - 2034186
+
+### Luana Portellinha Marino - 2034925
